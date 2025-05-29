@@ -12,19 +12,25 @@
 #define UART_PORT_LORA UART_NUM_2
 #define BUF_SIZE 4096
 
-typedef struct __attribute__((packed, aligned(1))) {
+typedef struct __attribute__((packed, aligned(1))) // size = 64 bytes
+{
     int32_t time;
-    uint32_t status;
+    uint16_t count;
+    uint16_t status;
+
     float pressure;
     float temperature;
     float bmp_altitude;
     float max_altitude;
+
     float accel_x;
     float accel_y;
     float accel_z;
-    float rotation_x;
-    float rotation_y;
-    float rotation_z;
+
+    float rotation_x; // Heading
+    float rotation_y; // Pitch
+    float rotation_z; // Roll
+
     float latitude;
     float longitude;
     float gps_altitude;
@@ -65,8 +71,8 @@ void lora_receive_task(void *pvParameters) {
         len = uart_read_bytes(UART_PORT_LORA, rx_buffer, sizeof(data_t), pdMS_TO_TICKS(1000));
         if (len == sizeof(data_t)) {
             memcpy(&received_data, rx_buffer, sizeof(data_t));
-            printf("Recebido: Time: %ld, Status: %lu, V: %.2f, Alt: %.2f, Lat: %.5f, Lon: %.5f\n",
-                received_data.time, received_data.status, received_data.voltage,
+            printf("Recebido: Time: %ld, Count: %u, Status: %u, V: %.2f, Alt: %.2f, Lat: %.5f, Lon: %.5f\n",
+                received_data.time, received_data.count, received_data.status, received_data.voltage,
                 received_data.bmp_altitude, received_data.latitude, received_data.longitude);
 
             // Envia os dados recebidos para o supervisório via UART
